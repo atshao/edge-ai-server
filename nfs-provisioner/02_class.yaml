@@ -1,0 +1,10 @@
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: managed-nfs-storage
+# "provisioner" can be whatever you want,
+# but must match deployment's env PROVISIONER_NAME
+provisioner: nfs-storage
+parameters:
+  archiveOnDeete: "false"
+

@@ -1,0 +1,2 @@
+helm install --name=dev-grafana -f values.yaml stable/grafana
+

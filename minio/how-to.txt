@@ -1,0 +1,2 @@
+helm install --name=dev-minio -f values.yaml stable/minio
+
