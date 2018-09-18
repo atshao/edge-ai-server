@@ -1,6 +1,3 @@
 *.swp
-rmm/container/src
-rmm/container/ota-worker
-rmm/container/rmm-worker
-rmm/container/rmm-portal
+rmm/container/.build
 
