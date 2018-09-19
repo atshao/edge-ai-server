@@ -1,0 +1,11 @@
+FROM openjdk:8-jre
+
+
+WORKDIR /rmm
+
+ARG VERSION
+COPY ota-worker-${VERSION}.jar .
+
+
+CMD ["java", "-jar", "ota-worker-${VERSION}.jar"]
+

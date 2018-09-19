@@ -1,0 +1,11 @@
+FROM openjdk:8-jre
+
+
+WORKDIR /rmm
+
+ARG VERSION
+COPY worker-${VERSION}.jar .
+
+
+CMD ["java", "-jar", "worker-${VERSION}.jar"]
+

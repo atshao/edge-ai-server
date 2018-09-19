@@ -4,14 +4,64 @@ set -o errexit
 
 
 #
-# directories
+# constants
 #
-GIT_URL="http://alex.shao@advgitlab.eastasia.cloudapp.azure.com"
+# docker
+DOCKER_USER="ecgwc"
+DOCKER_REPO_PREFIX="helm-"
+
+# git
+GIT_URL="http://advgitlab.eastasia.cloudapp.azure.com"
+
+# directories
 DIR_TOP="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-DIR_SRC="${DIR_TOP}/src"
-DIR_OTA_WORKER="${DIR_TOP}/ota-worker"
-DIR_RMM_WORKER="${DIR_TOP}/rmm-worker"
-DIR_RMM_PORTAL="${DIR_TOP}/rmm-portal"
+DIR_BUILD="${DIR_TOP}/.build"
+DIR_SRC="${DIR_BUILD}/src"
+DIR_OTA_WORKER="${DIR_BUILD}/ota-worker"
+DIR_RMM_WORKER="${DIR_BUILD}/rmm-worker"
+DIR_RMM_PORTAL="${DIR_BUILD}/rmm-portal"
+
+
+#
+# utilities
+#
+function get_relative() {
+    local base="$(pwd)"
+    local target="${1}"
+    local answer="$(realpath "${target}" --relative-to="${base}")"
+    echo $answer
+}
+
+function get_version() {
+    local filename="$(ls *.[jw]ar)"
+    local version="$(echo "${filename%.*}" | awk -F- '{print $NF}')"
+    echo $version
+}
+
+function docker_build_and_push() {
+    local wd="${1}"
+    local name="$(basename "${wd}")"
+
+    cd "${wd}"
+    version="$(get_version)"
+    repo="${DOCKER_USER}/${DOCKER_REPO_PREFIX}${name}"
+
+    docker build \
+        --build-arg VERSION="${version}" \
+        --tag "${repo}:${version}" \
+        --tag "${repo}:latest" \
+        .
+    docker push "${repo}:${version}"
+    docker push "${repo}:latest"
+}
+
+function prepare() {
+    local wd="${1}"
+    local docker_file="${2}"
+
+    rm -rf "${wd}" && mkdir -p "${wd}"
+    cd "${wd}" && cp "$(get_relative "${DIR_TOP}/${docker_file}")" Dockerfile
+}
 
 
 #
@@ -23,33 +73,25 @@ DIR_RMM_PORTAL="${DIR_TOP}/rmm-portal"
 #
 # pre-conditions
 #
-[ -d "${DIR_SRC}" ] || (
+if [ -d "${DIR_SRC}" ]; then
+    cd "${DIR_SRC}"
+    git pull
+else
     mkdir -p "${DIR_SRC}"
-    git clone ${GIT_URL}/EI-PaaS-RMM/RMM-EI-Server.git ${DIR_SRC}
+    git clone "${GIT_URL}/EI-PaaS-RMM/RMM-EI-Server.git" "${DIR_SRC}"
     chmod +x "${DIR_SRC}/gradlew"
-)
-[ -d "${DIR_OTA_WORKER}" ] && rm -f "${DIR_OTA_WORKER}"/*.jar || (
-    mkdir -p "${DIR_OTA_WORKER}"
-    cd "${DIR_OTA_WORKER}"
-    ln -s ../Dockerfile.ota Dockerfile
-)
-[ -d "${DIR_RMM_WORKER}" ] && rm -f "${DIR_RMM_WORKER}"/*.jar || (
-    mkdir -p "${DIR_RMM_WORKER}"
-    cd "${DIR_RMM_WORKER}"
-    ln -s ../Dockerfile.rmm Dockerfile
-)
-[ -d "${DIR_RMM_PORTAL}" ] && rm -f "${DIR_RMM_PORTAL}"/*.war || (
-    mkdir -p "${DIR_RMM_PORTAL}"
-    cd "${DIR_RMM_PORTAL}"
-    ln -s ../Dockerfile.portal Dockerfile
-)
+fi
+
+prepare "${DIR_OTA_WORKER}" "Dockerfile.ota"
+prepare "${DIR_RMM_WORKER}" "Dockerfile.rmm"
+prepare "${DIR_RMM_PORTAL}" "Dockerfile.portal"
 
 
 #
 # source build
 #
 (
-    cd ${DIR_SRC}
+    cd "${DIR_SRC}"
     ./gradlew clean fatJar war
     cp OTAWorker/build/libs/ota-worker-*.jar "${DIR_OTA_WORKER}"
     cp Worker/build/libs/worker-*.jar "${DIR_RMM_WORKER}"
@@ -57,4 +99,10 @@ DIR_RMM_PORTAL="${DIR_TOP}/rmm-portal"
 )
 
 
+#
+# create container image
+#
+docker_build_and_push "${DIR_OTA_WORKER}"
+docker_build_and_push "${DIR_RMM_WORKER}"
+docker_build_and_push "${DIR_RMM_PORTAL}"
 
