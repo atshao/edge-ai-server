@@ -1,0 +1,67 @@
+#
+# RMM image
+#
+image:
+  ota: "ecgwc/ota-worker"
+  worker: "ecgwc/rmm-worker"
+  portal: "ecgwc/rmm-portal"
+imageTag:
+  ota: "1.0.28"
+  worker: "1.0.77"
+  portal: "1.0.77"
+
+#
+# Server_Config.xml
+#
+serverConfig:
+  webServer:
+    host: "localhost"
+    port: 8080
+  brokerServer:
+    receive:
+      type: "AMQP"
+      host: "localhost"
+      port: 5672
+      account: "admin"
+      password: "0Sak+T0OheCIKudeIttf+99w7b5YroPv28cPwEX4J2U="
+      vhost: "/"
+      tenant: "+"
+      ssl: false
+    send:
+      type: "MQTT"
+      host: "localhost"
+      port: 1883
+      account: "admin"
+      password: "0Sak+T0OheCIKudeIttf+99w7b5YroPv28cPwEX4J2U="
+      vhost: "/"
+      tenant: "WISE-PaaS"
+      ssl: false
+  dbServer:
+    sql:
+      postgresql:
+        host: "localhost"
+        port: 5432
+        database: "wisepaas"
+        schema: "public"
+        user: "common"
+        password: "A8vNM7+2qYEX0mCPXmGXhw=="
+    nosql:
+      dialect: "mongo"
+      mongo:
+        host: "localhost"
+        port: 27017
+        user: "wisepaas"
+        password: "WYOayctZri8m3Af8f7N7hQ=="
+        database: "WISE-PaaS"
+        ssl: false
+      influx:
+        url: "http://localhost:8086"
+        user: "wisepaas"
+        password: "WYOayctZri8m3Af8f7N7hQ=="
+        database: "WISEPaaS"
+      hbase:
+        url: "jdbc://localhost:12345"
+        user: "wisepaas"
+        password: "WYOayctZri8m3Af8f7N7hQ=="
+        database: "WISEPaaS"
+

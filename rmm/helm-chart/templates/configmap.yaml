@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "rmm.fullname" . }}
+  labels:
+    app: {{ template "rmm.name" . }}
+    chart: {{ template "rmm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  serverConfig: |-
+    <?xml version="1.0" encoding="UTF-8"?>
+    <Configuration>
+      <WebServer>
+        {{- with .Values.serverConfig.webServer }}
+        <IP>{{ .host | default "127.0.0.1" }}</IP>
+        <HTTPPort>{{ .port | default "8080" }}</HTTPPort>
+        {{- end }}
+      </WebServer>
+      <BrokerServer>
+        {{- with .Values.serverConfig.brokerServer }}
+        <Receive>
+          <Type>{{ .receive.type | default "AMQP" }}</Type>
+          <IP>{{ .receive.host }}</IP>
+          <Port>{{ .receive.port | default "5672" }}</Port>
+          <Account>{{ .receive.account | default "admin" }}</Account>
+          <Password>{{ .receive.password | default "0Sak+T0OheCIKudeIttf+99w7b5YroPv28cPwEX4J2U=" }}</Password>
+          <Vhost>{{ .receive.vhost | default "/" }}</Vhost>
+          <Tenant>{{ .receive.tenant | default "+" }}</Tenant>
+          <SSLEnable>{{ .receive.ssl | default "false" }}</SSLEnable>
+        </Receive>
+        <Send>
+          <Type>{{ .send.type | default "MQTT" }}</Type>
+          <IP>{{ .send.host }}</IP>
+          <Port>{{ .send.port | default "1883" }}</Port>
+          <Account>{{ .send.acount | default "admin" }}</Account>
+          <Password>{{ .send.password | default "0Sak+T0OheCIKudeIttf+99w7b5YroPv28cPwEX4J2U=" }}</Password>
+          <Vhost>{{ .send.vhost | default "/" }}</Vhost>
+          <Tenant>{{ .send.tenant | default "WISE-PaaS" }}</Tenant>
+          <SSLEnable>{{ .send.ssl | default "false" }}</SSLEnable>
+        </Send>
+        {{- end }}
+      </BrokerServer>
+      <DBServer>
+        <SQL>
+          {{- with .Values.serverConfig.dbServer.sql }}
+          <PostgreSQL>
+            <Properties>
+              <property name="eclipselink.cache.size.default" value="0"/>
+              <property name="eclipselink.logging.level" value="OFF"/>
+              <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://{{ .postgresql.host }}:{{ .postgresql.port | default "5432" }}/{{ .postgresql.database | default "wisepaas" }}?currentSchema={{ .postgresql.schema | default "public" }}"/>
+              <property name="javax.persistence.jdbc.user" value={{ .postgresql.user | default "common" | quote }}/>
+              <property name="eclipselink.cache.shared.default" value="false"/>
+              <property name="javax.persistence.jdbc.password" value={{ .postgresql.password | default "A8vNM7+2qYEX0mCPXmGXhw==" | quote }}/>
+              <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+              <property name="eclipselink.cache.type.default" value="NONE"/>
+              <property name="eclipselink.jdbc.cache-statements" value="true"/>
+            </Properties>
+          </PostgreSQL>
+          {{- end }}
+        </SQL>
+        <NoSQL>
+          {{- with .Values.serverConfig.dbServer.nosql }}
+          <Dialect>{{ .dialect | default "Mongo" }}</Dialect>
+          {{- $dialect := default "mongo" .dialect | lower }}
+          {{- if eq $dialect "mongo" }}
+          <MongoDB>
+            <IP>{{ .mongo.host }}</IP>
+            <Port>{{ .mongo.port | default "27017" }}</Port>
+            <username>{{ .mongo.user | default "wisepaas" }}</username>
+            <Password>{{ .mongo.password | default "WYOayctZri8m3Af8f7N7hQ==" }}</Password>
+            <DBName>{{ .mongo.database | default "WISE-PaaS" }}</DBName>
+            <ssl>{{ .mongo.ssl | default "false" }}</ssl>
+          </MongoDB>
+          {{- else if eq $dialect "influx" }}
+          <InfluxDB>
+            <URL>{{ .influx.url }}</URL>
+            <username>{{ .influx.user | default "wisepaas" }}</username>
+            <Password>{{ .influx.password | default "WYOayctZri8m3Af8f7N7hQ==" }}</Password>
+            <DBName>{{ .influx.database | default "WISEPaaS" }}</DBName>
+          </InfluxDB>
+          {{- else if eq $dialect "hbase" }}
+          <HBaseDB>
+            <URL>{{ .hbase.url }}</URL>
+            <username>{{ .hbase.user | default "wisepaas" }}</username>
+            <Password>{{ .hbase.password | default "WYOayctZri8m3Af8f7N7hQ==" }}</Password>
+            <DBName>{{ .hbase.database | default "WISEPaaS" }}</DBName>
+          </HBaseDB>
+          {{- end }}
+          {{- end }}
+        </NoSQL>
+      </DBServer>
+      <Log4j>
+        <Properties>
+          <property name="log4j.logger.STDOUT" value="debug, STDOUT"/>
+          <property name="log4j.appender.STDOUT" value="org.apache.log4j.ConsoleAppender"/>
+          <property name="log4j.appender.STDOUT.layout" value="org.apache.log4j.PatternLayout"/>
+          <property name="log4j.appender.STDOUT.layout.ConversionPattern" value="[%d{yyyy-MM-dd hh:mm:ss}][%p][%l]%n%m%n"/>
+          <property name="log4j.logger.DB" value="debug, DB"/>
+          <property name="log4j.appender.DB" value="org.apache.log4j.jdbc.JDBCAppender"/>
+          <property name="log4j.appender.DB.layout" value="org.apache.log4j.PatternLayout"/>
+          <property name="log4j.appender.DB.sql" value="INSERT INTO log (level, message, thread, location, class, ts) VALUES ('%p', '%m', '%t', '%l',  '%c', '%d{ yyyy-MM-dd HH:mm:ss.SSS}')"/>
+        </Properties>
+      </Log4j>
+      <DefaultStorage>
+        <Storages>
+          <List></List>
+        </Storages>
+      </DefaultStorage>
+      <AgentCredential>
+        <BrokerHost></BrokerHost>
+        <EndPoint></EndPoint>
+        <KeyName></KeyName>
+      </AgentCredential>
+    </Configuration>
+
+
