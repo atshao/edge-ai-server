@@ -43,7 +43,7 @@ function docker_build_and_push() {
     local name="$(basename "${wd}")"
 
     cd "${wd}"
-    version="$(get_version)"
+    local version="$(get_version)"
     repo="${DOCKER_USER}/${DOCKER_REPO_PREFIX}${name}"
 
     docker build \
