@@ -23,44 +23,27 @@ DIR_RMM_PORTAL="${DIR_BUILD}/rmm-portal"
 
 
 #
-# utilities
+# functions
 #
-function get_relative() {
-    local base="$(pwd)"
-    local target="${1}"
-    local answer="$(realpath "${target}" --relative-to="${base}")"
-    echo $answer
-}
-
-function get_version() {
-    local filename="$(ls *.[jw]ar)"
-    local version="$(echo "${filename%.*}" | awk -F- '{print $NF}')"
-    echo $version
-}
-
 function docker_build_and_push() {
     local wd="${1}"
+    local dockerfile="${2}"
     local name="$(basename "${wd}")"
 
     cd "${wd}"
-    local version="$(get_version)"
-    repo="${DOCKER_USER}/${DOCKER_REPO_PREFIX}${name}"
+
+    local filename="$(ls *.[jw]ar)"
+    local version="$(echo "${filename%.*}" | awk -F- '{print $NF}')"
+    local repo="${DOCKER_USER}/${DOCKER_REPO_PREFIX}${name}"
 
     docker build \
         --build-arg VERSION="${version}" \
         --tag "${repo}:${version}" \
         --tag "${repo}:latest" \
+        --file "${dockerfile}" \
         .
     docker push "${repo}:${version}"
     docker push "${repo}:latest"
-}
-
-function prepare() {
-    local wd="${1}"
-    local docker_file="${2}"
-
-    rm -rf "${wd}" && mkdir -p "${wd}"
-    cd "${wd}" && cp "$(get_relative "${DIR_TOP}/${docker_file}")" Dockerfile
 }
 
 
@@ -82,9 +65,9 @@ else
     chmod +x "${DIR_SRC}/gradlew"
 fi
 
-prepare "${DIR_OTA_WORKER}" "Dockerfile.ota"
-prepare "${DIR_RMM_WORKER}" "Dockerfile.rmm"
-prepare "${DIR_RMM_PORTAL}" "Dockerfile.portal"
+rm -rf "${DIR_OTA_WORKER}" && mkdir -p "${DIR_OTA_WORKER}"
+rm -rf "${DIR_RMM_WORKER}" && mkdir -p "${DIR_RMM_WORKER}"
+rm -rf "${DIR_RMM_PORTAL}" && mkdir -p "${DIR_RMM_PORTAL}"
 
 
 #
@@ -102,7 +85,7 @@ prepare "${DIR_RMM_PORTAL}" "Dockerfile.portal"
 #
 # create container image
 #
-docker_build_and_push "${DIR_OTA_WORKER}"
-docker_build_and_push "${DIR_RMM_WORKER}"
-docker_build_and_push "${DIR_RMM_PORTAL}"
+docker_build_and_push "${DIR_OTA_WORKER}" "${DIR_TOP}/Dockerfile.ota"
+docker_build_and_push "${DIR_RMM_WORKER}" "${DIR_TOP}/Dockerfile.rmm"
+docker_build_and_push "${DIR_RMM_PORTAL}" "${DIR_TOP}/Dockerfile.portal"
 
