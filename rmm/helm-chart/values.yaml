@@ -2,14 +2,37 @@
 # RMM image
 #
 image:
-  ota: "ecgwc/ota-worker"
-  worker: "ecgwc/rmm-worker"
-  portal: "ecgwc/rmm-portal"
+  ota: "ecgwc/helm-ota-worker"
+  rmm: "ecgwc/helm-rmm-worker"
+  portal: "ecgwc/helm-rmm-portal"
 imageTag:
   ota: "1.0.28"
-  worker: "1.0.77"
-  portal: "1.0.77"
-
+  rmm: "1.0.78"
+  portal: "1.0.78"
+#
+# MongoDB administrator
+#
+mongo:
+  username: admin
+  password:
+#
+# InfluxDB administrator
+#
+influx:
+  username: to-be-added
+  password: to-be-added
+#
+# HBase administrator
+#
+hbase:
+  username: to-be-added
+  password: to-be-added
+#
+# PostgreSQL administrator
+#
+postgresql:
+  username: postgres
+  password: "OFL82Vf08c"
 #
 # Server_Config.xml
 #
@@ -39,29 +62,32 @@ serverConfig:
   dbServer:
     sql:
       postgresql:
-        host: "localhost"
+        host: "61.218.118.228"
         port: 5432
         database: "wisepaas"
-        schema: "public"
-        user: "common"
-        password: "A8vNM7+2qYEX0mCPXmGXhw=="
+        schema: "rmm"
+        username: "rmm"
+        password: "5msIhSQ5Ggq7alAAtFcPiQ=="
     nosql:
       dialect: "mongo"
       mongo:
-        host: "localhost"
-        port: 27017
-        user: "wisepaas"
+        # NOTE:
+        #   if mongo uses replicaset, not using array here.
+        #   Instead, uses string with ';' as the delimiter.
+        host: "host1;host2;host3"
+        port: "port1;port2;port3"
+        username: "wisepaas"
         password: "WYOayctZri8m3Af8f7N7hQ=="
         database: "WISE-PaaS"
         ssl: false
       influx:
         url: "http://localhost:8086"
-        user: "wisepaas"
+        username: "wisepaas"
         password: "WYOayctZri8m3Af8f7N7hQ=="
         database: "WISEPaaS"
       hbase:
         url: "jdbc://localhost:12345"
-        user: "wisepaas"
+        username: "wisepaas"
         password: "WYOayctZri8m3Af8f7N7hQ=="
         database: "WISEPaaS"
 

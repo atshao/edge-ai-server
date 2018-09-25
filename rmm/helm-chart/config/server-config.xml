@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+  <WebServer>
+    {{- with .Values.serverConfig.webServer }}
+    <IP>{{ .host }}</IP>
+    <HTTPPort>{{ .port }}</HTTPPort>
+    {{- end }}
+  </WebServer>
+  <BrokerServer>
+    {{- with .Values.serverConfig.brokerServer }}
+    <Receive>
+      <Type>{{ .receive.type }}</Type>
+      <IP>{{ .receive.host }}</IP>
+      <Port>{{ .receive.port }}</Port>
+      <Account>{{ .receive.account }}</Account>
+      <Password>{{ .receive.password }}</Password>
+      <Vhost>{{ .receive.vhost }}</Vhost>
+      <Tenant>{{ .receive.tenant }}</Tenant>
+      <SSLEnable>{{ .receive.ssl }}</SSLEnable>
+    </Receive>
+    <Send>
+      <Type>{{ .send.type }}</Type>
+      <IP>{{ .send.host }}</IP>
+      <Port>{{ .send.port }}</Port>
+      <Account>{{ .send.acount }}</Account>
+      <Password>{{ .send.password }}</Password>
+      <Vhost>{{ .send.vhost }}</Vhost>
+      <Tenant>{{ .send.tenant }}</Tenant>
+      <SSLEnable>{{ .send.ssl }}</SSLEnable>
+    </Send>
+    {{- end }}
+  </BrokerServer>
+  <DBServer>
+    <SQL>
+      {{- with .Values.serverConfig.dbServer.sql.postgresql }}
+      <PostgreSQL>
+        <Properties>
+          <property name="eclipselink.cache.size.default" value="0"/>
+          <property name="eclipselink.logging.level" value="OFF"/>
+          <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://{{ .host }}:{{ .port }}/{{ .database }}?currentSchema={{ .schema }}"/>
+          <property name="javax.persistence.jdbc.user" value="{{ .username }}"/>
+          <property name="eclipselink.cache.shared.default" value="false"/>
+          <property name="javax.persistence.jdbc.password" value="{{ .password }}"/>
+          <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
+          <property name="eclipselink.cache.type.default" value="NONE"/>
+          <property name="eclipselink.jdbc.cache-statements" value="true"/>
+        </Properties>
+      </PostgreSQL>
+      {{- end }}
+    </SQL>
+    <NoSQL>
+      {{- with .Values.serverConfig.dbServer.nosql }}
+      <Dialect>{{ .dialect }}</Dialect>
+      {{- $dialect := .dialect | lower }}
+      {{- if eq $dialect "mongo" }}
+      <MongoDB>
+        <IP>{{ .mongo.host }}</IP>
+        <Port>{{ .mongo.port }}</Port>
+        <username>{{ .mongo.username }}</username>
+        <Password>{{ .mongo.password }}</Password>
+        <DBName>{{ .mongo.database }}</DBName>
+        <ssl>{{ .mongo.ssl }}</ssl>
+      </MongoDB>
+      {{- else if eq $dialect "influx" }}
+      <InfluxDB>
+        <URL>{{ .influx.url }}</URL>
+        <username>{{ .influx.username }}</username>
+        <Password>{{ .influx.password }}</Password>
+        <DBName>{{ .influx.database }}</DBName>
+      </InfluxDB>
+      {{- else if eq $dialect "hbase" }}
+      <HBaseDB>
+        <URL>{{ .hbase.url }}</URL>
+        <username>{{ .hbase.username }}</username>
+        <Password>{{ .hbase.password }}</Password>
+        <DBName>{{ .hbase.database }}</DBName>
+      </HBaseDB>
+      {{- end }}
+      {{- end }}
+    </NoSQL>
+  </DBServer>
+  <Log4j>
+    <Properties>
+      <property name="log4j.logger.STDOUT" value="debug, STDOUT"/>
+      <property name="log4j.appender.STDOUT" value="org.apache.log4j.ConsoleAppender"/>
+      <property name="log4j.appender.STDOUT.layout" value="org.apache.log4j.PatternLayout"/>
+      <property name="log4j.appender.STDOUT.layout.ConversionPattern" value="[%d{yyyy-MM-dd hh:mm:ss}][%p][%l]%n%m%n"/>
+      <property name="log4j.logger.DB" value="debug, DB"/>
+      <property name="log4j.appender.DB" value="org.apache.log4j.jdbc.JDBCAppender"/>
+      <property name="log4j.appender.DB.layout" value="org.apache.log4j.PatternLayout"/>
+      <property name="log4j.appender.DB.sql" value="INSERT INTO log (level, message, thread, location, class, ts) VALUES ('%p', '%m', '%t', '%l',  '%c', '%d{ yyyy-MM-dd HH:mm:ss.SSS}')"/>
+    </Properties>
+  </Log4j>
+  <DefaultStorage>
+    <Storages>
+      <List></List>
+    </Storages>
+  </DefaultStorage>
+  <AgentCredential>
+    <BrokerHost></BrokerHost>
+    <EndPoint></EndPoint>
+    <KeyName></KeyName>
+  </AgentCredential>
+</Configuration>

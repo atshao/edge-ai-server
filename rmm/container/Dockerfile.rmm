@@ -7,5 +7,6 @@ ARG VERSION
 COPY worker-${VERSION}.jar .
 
 
-CMD ["java", "-jar", "worker-${VERSION}.jar"]
+ENV RMM_WORKER_VERSION ${VERSION}
+CMD java -jar worker-${RMM_WORKER_VERSION}.jar
 

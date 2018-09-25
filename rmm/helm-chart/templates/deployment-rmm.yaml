@@ -1,0 +1,110 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ template "rmm.fullname" . }}-worker
+  labels:
+    app: {{ template "rmm.name" . }}
+    chart: {{ template "rmm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    rmmModule: rmm-worker
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "rmm.name" . }}
+      release: {{ .Release.Name }}
+      rmmModule: rmm-worker
+  template:
+    metadata:
+      labels:
+        app: {{ template "rmm.name" . }}
+        release: {{ .Release.Name }}
+        rmmModule: rmm-worker
+    spec:
+      containers:
+        - name: {{ template "rmm.fullname" . }}-worker
+          image: {{ .Values.image.rmm }}:{{ .Values.imageTag.rmm }}
+          imagePullPolicy: {{ if eq .Values.imageTag.rmm "latest" }}Always{{ else }}IfNotPresent{{ end }}
+      initContainers:
+        - name: init-postgres
+          image: postgres:9.6-alpine
+          env:
+            - name: PGHOST
+              value: {{ .Values.serverConfig.dbServer.sql.postgresql.host | quote }}
+            - name: PGPORT
+              value: {{ .Values.serverConfig.dbServer.sql.postgresql.port | quote }}
+            - name: PGUSER
+              value: {{ .Values.postgresql.username | quote }}
+            - name: PGPASSWORD
+              value: {{ .Values.postgresql.password | quote }}
+          volumeMounts:
+            - name: config
+              mountPath: /rmm/init
+              readOnly: true
+          command:
+            - "sh"
+          args:
+            - "-c"
+            - |
+              set -x
+
+              echo "Waiting for PostgreSQL to be ready..."
+              until pg_isready -q; do
+                  echo "Still waiting..."
+                  sleep 2
+              done
+
+              psql -f /rmm/init/postgres.sql
+              {{- with .Values.serverConfig.dbServer.sql.postgresql }}
+              psql -c "SELECT 'x123' FROM pg_database WHERE datname='{{ .database }}'" | grep 'x123'
+              if [ $? -ne 0 ]; then
+                  psql -c "CREATE DATABASE {{ .database }} WITH OWNER wisepaas"
+              fi
+              {{- end }}
+        {{- with .Values.serverConfig.dbServer.nosql }}
+        {{- $dialect := .dialect | lower }}
+        {{- if eq $dialect "mongo" }}
+        - name: init-mongo
+          image: mongo:3.6-stretch
+          volumeMounts:
+            - name: config
+              mountPath: /rmm/init
+              readOnly: true
+          command:
+            - "sh"
+          args:
+            - "-c"
+            - |
+              set -x
+
+              echo "Waiting for MongoDB to be ready..."
+              until mongo --host  --eval "db.adminCommand('ping')"; do
+                  echo "Still waiting..."
+                  sleep 2
+              done
+        {{- if eq $dialect "influx" }}
+        - name: init-influx
+        {{- if eq $dialect "hbase" }}
+        - name: init-hbase
+        {{- end }}
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "rmm.fullname" . }}
+            items:
+              - key: initPostgres
+                path: postgres.sql
+              {{- with .Values.serverConfig.dbServer.nosql }}
+              {{- $dialect := .dialect | lower }}
+              {{- if eq $dialect "mongo" }}
+              - key: initMongo
+                path: mongo.js
+              {{- else if eq $dialect "influx" }}
+              - key: initInflux
+                path: influx.sql
+              {{- else if eq $dialect "hbase" }}
+              - key: initHbase
+                path: hbase.sql
+              {{- end }}
+              {{- end }}
+

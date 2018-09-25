@@ -6,6 +6,6 @@ WORKDIR /rmm
 ARG VERSION
 COPY ota-worker-${VERSION}.jar .
 
-
-CMD ["java", "-jar", "ota-worker-${VERSION}.jar"]
+ENV OTA_WORKER_VERSION=${VERSION}
+CMD java -jar ota-worker-${OTA_WORKER_VERSION}.jar
 
