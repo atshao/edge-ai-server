@@ -7,6 +7,7 @@ metadata:
     chart: {{ template "rmm.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
+    rmmModule: rmm-portal
 spec:
   type: NodePort
   selector:
@@ -15,6 +16,6 @@ spec:
     rmmModule: rmm-portal
   ports:
     - protocol: TCP
-      port: 80
-      targetPort: 80
-      nodePort: 80
+      port: 8080
+      targetPort: 8080
+      nodePort: 8080

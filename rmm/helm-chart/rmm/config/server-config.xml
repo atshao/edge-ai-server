@@ -22,7 +22,7 @@
       <Type>{{ .send.type }}</Type>
       <IP>{{ .send.host }}</IP>
       <Port>{{ .send.port }}</Port>
-      <Account>{{ .send.acount }}</Account>
+      <Account>{{ .send.account }}</Account>
       <Password>{{ .send.password }}</Password>
       <Vhost>{{ .send.vhost }}</Vhost>
       <Tenant>{{ .send.tenant }}</Tenant>
@@ -37,10 +37,10 @@
         <Properties>
           <property name="eclipselink.cache.size.default" value="0"/>
           <property name="eclipselink.logging.level" value="OFF"/>
-          <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://{{ .host }}:{{ .port }}/{{ .database }}?currentSchema={{ .schema }}"/>
-          <property name="javax.persistence.jdbc.user" value="{{ .username }}"/>
+          <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://{{ .host }}:{{ .port }}/{{ .database }}?currentSchema=rmm"/>
+          <property name="javax.persistence.jdbc.user" value="rmm"/>
           <property name="eclipselink.cache.shared.default" value="false"/>
-          <property name="javax.persistence.jdbc.password" value="{{ .password }}"/>
+          <property name="javax.persistence.jdbc.password" value="5msIhSQ5Ggq7alAAtFcPiQ=="/>
           <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
           <property name="eclipselink.cache.type.default" value="NONE"/>
           <property name="eclipselink.jdbc.cache-statements" value="true"/>
@@ -56,23 +56,23 @@
       <MongoDB>
         <IP>{{ .mongo.host }}</IP>
         <Port>{{ .mongo.port }}</Port>
-        <username>{{ .mongo.username }}</username>
-        <Password>{{ .mongo.password }}</Password>
+        <username>wisepaas</username>
+        <Password>WYOayctZri8m3Af8f7N7hQ==</Password>
         <DBName>{{ .mongo.database }}</DBName>
         <ssl>{{ .mongo.ssl }}</ssl>
       </MongoDB>
       {{- else if eq $dialect "influx" }}
       <InfluxDB>
         <URL>{{ .influx.url }}</URL>
-        <username>{{ .influx.username }}</username>
-        <Password>{{ .influx.password }}</Password>
+        <username>wisepaas</username>
+        <Password>WYOayctZri8m3Af8f7N7hQ==</Password>
         <DBName>{{ .influx.database }}</DBName>
       </InfluxDB>
       {{- else if eq $dialect "hbase" }}
       <HBaseDB>
         <URL>{{ .hbase.url }}</URL>
-        <username>{{ .hbase.username }}</username>
-        <Password>{{ .hbase.password }}</Password>
+        <username>wisepaas</username>
+        <Password>WYOayctZri8m3Af8f7N7hQ==</Password>
         <DBName>{{ .hbase.database }}</DBName>
       </HBaseDB>
       {{- end }}

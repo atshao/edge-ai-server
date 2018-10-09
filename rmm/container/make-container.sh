@@ -7,7 +7,7 @@ set -o errexit
 # constants
 #
 # docker
-DOCKER_USER="ecgwc"
+: ${DOCKER_USER:="ecgwc"}
 DOCKER_REPO_PREFIX="helm-"
 
 # git
@@ -25,6 +25,18 @@ DIR_RMM_PORTAL="${DIR_BUILD}/rmm-portal"
 #
 # functions
 #
+function build_for_develop() {
+    local answer=1
+    for argv in ${BASH_ARGV[@]}; do
+        # -d | --develop, checkout 'develop' branch to build
+        if [ "${argv}" = "-d" -o "${argv}" = "--develop" ]; then
+            answer=0
+            break
+        fi
+    done
+    echo ${answer}
+}
+
 function docker_build_and_push() {
     local wd="${1}"
     local dockerfile="${2}"
@@ -58,11 +70,19 @@ function docker_build_and_push() {
 #
 if [ -d "${DIR_SRC}" ]; then
     cd "${DIR_SRC}"
+    if [ $(build_for_develop) -eq 0 ]; then
+        git checkout develop
+    else
+        git checkout master
+    fi
     git pull
 else
     mkdir -p "${DIR_SRC}"
     git clone "${GIT_URL}/EI-PaaS-RMM/RMM-EI-Server.git" "${DIR_SRC}"
     chmod +x "${DIR_SRC}/gradlew"
+    if [ $(build_for_develop) -eq 0 ]; then
+        git checkout develop
+    fi
 fi
 
 rm -rf "${DIR_OTA_WORKER}" && mkdir -p "${DIR_OTA_WORKER}"

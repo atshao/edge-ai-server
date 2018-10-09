@@ -1,6 +1,19 @@
 DO
 $$
 BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='g_ro_public') THEN
+    CREATE ROLE g_ro_public
+    WITH
+      NOSUPERUSER
+      INHERIT
+      NOCREATEROLE
+      NOCREATEDB
+      NOLOGIN
+      NOREPLICATION
+      NOBYPASSRLS
+      VALID UNTIL 'infinity';
+  END IF;
+
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='g_rw_public') THEN
     CREATE ROLE g_rw_public
     WITH
@@ -53,9 +66,8 @@ BEGIN
       VALID UNTIL 'infinity';
   END IF;
 
-  {{ with .Values.serverConfig.dbServer.sql.postgresql -}}
-  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='{{ .username }}') THEN
-    CREATE ROLE {{ .username }}
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname='rmm') THEN
+    CREATE ROLE rmm
     WITH
       NOSUPERUSER
       INHERIT
@@ -64,14 +76,14 @@ BEGIN
       LOGIN
       NOREPLICATION
       NOBYPASSRLS
-      PASSWORD '{{ .password }}'
+      PASSWORD 'md5168f3490345f870ecb4dbbeaaa6d22d8'
       VALID UNTIL 'infinity';
 
-    GRANT g_rmm TO {{ .username }};
-    GRANT g_rw_public TO {{ .username }};
-    GRANT g_ota TO {{ .username }};
-    GRANT wisepaas TO {{ .username }};
+    GRANT g_ro_public TO rmm;
+    GRANT g_rw_public TO rmm;
+    GRANT g_rmm TO rmm;
+    GRANT g_ota TO rmm;
+    GRANT wisepaas TO rmm;
   END IF;
-  {{- end }}
 END
 $$

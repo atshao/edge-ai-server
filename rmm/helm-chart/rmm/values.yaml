@@ -6,27 +6,9 @@ image:
   rmm: "ecgwc/helm-rmm-worker"
   portal: "ecgwc/helm-rmm-portal"
 imageTag:
-  ota: "1.0.28"
-  rmm: "1.0.78"
-  portal: "1.0.78"
-#
-# MongoDB administrator
-#
-mongo:
-  username: admin
-  password:
-#
-# InfluxDB administrator
-#
-influx:
-  username: to-be-added
-  password: to-be-added
-#
-# HBase administrator
-#
-hbase:
-  username: to-be-added
-  password: to-be-added
+  ota: "1.0.29"
+  rmm: "1.0.79"
+  portal: "1.0.79"
 #
 # PostgreSQL administrator
 #
@@ -43,51 +25,42 @@ serverConfig:
   brokerServer:
     receive:
       type: "AMQP"
-      host: "localhost"
+      host: "dev-broker-rabbitmq-ha"
       port: 5672
       account: "admin"
-      password: "0Sak+T0OheCIKudeIttf+99w7b5YroPv28cPwEX4J2U="
+      password: "y0XOo3zAn73qUo/K8WZIMmM/Zt2RTwMgusr6PReTQ14="
       vhost: "/"
       tenant: "+"
       ssl: false
     send:
       type: "MQTT"
-      host: "localhost"
+      host: "dev-broker-rabbitmq-ha"
       port: 1883
       account: "admin"
-      password: "0Sak+T0OheCIKudeIttf+99w7b5YroPv28cPwEX4J2U="
+      password: "y0XOo3zAn73qUo/K8WZIMmM/Zt2RTwMgusr6PReTQ14="
       vhost: "/"
       tenant: "WISE-PaaS"
       ssl: false
   dbServer:
     sql:
       postgresql:
-        host: "61.218.118.228"
+        host: "dev-rdb-postgresql"
         port: 5432
         database: "wisepaas"
-        schema: "rmm"
-        username: "rmm"
-        password: "5msIhSQ5Ggq7alAAtFcPiQ=="
     nosql:
       dialect: "mongo"
       mongo:
         # NOTE:
         #   if mongo uses replicaset, not using array here.
         #   Instead, uses string with ';' as the delimiter.
-        host: "host1;host2;host3"
-        port: "port1;port2;port3"
-        username: "wisepaas"
-        password: "WYOayctZri8m3Af8f7N7hQ=="
+        host: "dev-nosql-mongodb-replicaset-0.dev-nosql-mongodb-replicaset;dev-nosql-mongodb-replicaset-1.dev-nosql-mongodb-replicaset;dev-nosql-mongodb-replicaset-2.dev-nosql-mongodb-replicaset"
+        port: "27017;27017;27017"
         database: "WISE-PaaS"
         ssl: false
       influx:
         url: "http://localhost:8086"
-        username: "wisepaas"
-        password: "WYOayctZri8m3Af8f7N7hQ=="
         database: "WISEPaaS"
       hbase:
         url: "jdbc://localhost:12345"
-        username: "wisepaas"
-        password: "WYOayctZri8m3Af8f7N7hQ=="
         database: "WISEPaaS"
 

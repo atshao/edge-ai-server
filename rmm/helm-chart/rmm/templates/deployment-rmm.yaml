@@ -25,6 +25,13 @@ spec:
         - name: {{ template "rmm.fullname" . }}-worker
           image: {{ .Values.image.rmm }}:{{ .Values.imageTag.rmm }}
           imagePullPolicy: {{ if eq .Values.imageTag.rmm "latest" }}Always{{ else }}IfNotPresent{{ end }}
+          env:
+            - name: RMM_SERVER_CONFIG
+              value: /rmm/config
+          volumeMounts:
+            - name: config
+              mountPath: /rmm/config
+              readOnly: true
       initContainers:
         - name: init-postgres
           image: postgres:9.6-alpine
@@ -38,7 +45,7 @@ spec:
             - name: PGPASSWORD
               value: {{ .Values.postgresql.password | quote }}
           volumeMounts:
-            - name: config
+            - name: script
               mountPath: /rmm/init
               readOnly: true
           command:
@@ -54,10 +61,12 @@ spec:
                   sleep 2
               done
 
+              echo "Initializing PostgreSQL roles..."
               psql -f /rmm/init/postgres.sql
               {{- with .Values.serverConfig.dbServer.sql.postgresql }}
               psql -c "SELECT 'x123' FROM pg_database WHERE datname='{{ .database }}'" | grep 'x123'
               if [ $? -ne 0 ]; then
+                  echo "Creating '{{ .database }}' database..."
                   psql -c "CREATE DATABASE {{ .database }} WITH OWNER wisepaas"
               fi
               {{- end }}
@@ -67,28 +76,54 @@ spec:
         - name: init-mongo
           image: mongo:3.6-stretch
           volumeMounts:
-            - name: config
+            - name: script
               mountPath: /rmm/init
               readOnly: true
           command:
-            - "sh"
+            - "bash"
           args:
             - "-c"
             - |
               set -x
 
+              IFS=';' read -ra M_HOST <<< "{{ .mongo.host }}"
+              IFS=';' read -ra M_PORT <<< "{{ .mongo.port }}"
+
+              HOST=""
+              if [ ${#M_HOST[@]} -eq ${#M_PORT[@]} ]; then
+                  start=0
+                  end=${#M_HOST[@]}
+                  for ((i = start; i < end; i++)); do
+                      if [ "${HOST}" = "" ]; then
+                          HOST="${M_HOST[i]}:${M_PORT[i]}"
+                      else
+                          HOST="${HOST},${M_HOST[i]}:${M_PORT[i]}"
+                      fi
+                  done
+              fi
+
               echo "Waiting for MongoDB to be ready..."
-              until mongo --host  --eval "db.adminCommand('ping')"; do
+              until mongo --host ${HOST} --eval "db.adminCommand('ping')"; do
                   echo "Still waiting..."
                   sleep 2
               done
-        {{- if eq $dialect "influx" }}
+
+              echo "Initializing MongoDB..."
+              mongo --host ${HOST} /rmm/init/mongo.js
+        {{- else if eq $dialect "influx" }}
         - name: init-influx
-        {{- if eq $dialect "hbase" }}
+        {{- else if eq $dialect "hbase" }}
         - name: init-hbase
+        {{- end }}
         {{- end }}
       volumes:
         - name: config
+          configMap:
+            name: {{ template "rmm.fullname" . }}
+            items:
+              - key: serverConfig
+                path: Server_Config.xml
+        - name: script
           configMap:
             name: {{ template "rmm.fullname" . }}
             items:

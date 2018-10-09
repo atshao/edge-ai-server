@@ -1,0 +1,68 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ template "rmm.fullname" . }}-portal
+  labels:
+    app: {{ template "rmm.name" . }}
+    chart: {{ template "rmm.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+    rmmModule: rmm-portal
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "rmm.name" . }}
+      release: {{ .Release.Name }}
+      rmmModule: rmm-portal
+  template:
+    metadata:
+      labels:
+        app: {{ template "rmm.name" . }}
+        release: {{ .Release.Name }}
+        rmmModule: rmm-portal
+    spec:
+      containers:
+        - name: {{ template "rmm.fullname" . }}-portal
+          image: {{ .Values.image.portal }}:{{ .Values.imageTag.portal }}
+          imagePullPolicy: {{ if eq .Values.imageTag.portal "latest" }}Always{{ else }}IfNotPresent{{ end }}
+          env:
+            - name: RMM_SERVER_CONFIG
+              value: /rmm/config
+          volumeMounts:
+            - name: config
+              mountPath: /rmm/config
+              readOnly: true
+      initContainers:
+        - name: init
+          image: postgres:9.6-alpine
+          env:
+            - name: PGHOST
+              value: {{ .Values.serverConfig.dbServer.sql.postgresql.host | quote }}
+            - name: PGPORT
+              value: {{ .Values.serverConfig.dbServer.sql.postgresql.port | quote }}
+            - name: PGDATABASE
+              value: {{ .Values.serverConfig.dbServer.sql.postgresql.database | quote }}
+            - name: PGUSER
+              value: "rmm"
+            - name: PGPASSWORD
+              value: "rmm"
+          command:
+            - "sh"
+          args:
+            - "-c"
+            - |
+              set -x
+
+              echo "Waiting for PostgreSQL to be initialized..."
+              until psql -c 'select * from public.device' &> /dev/null; do
+                  echo "Still initializing..."
+                  sleep 2
+              done
+      volumes:
+        - name: config
+          configMap:
+            name: {{ template "rmm.fullname" . }}
+            items:
+              - key: serverConfig
+                path: Server_Config.xml
+

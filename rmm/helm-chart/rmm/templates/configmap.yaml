@@ -9,9 +9,8 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   initPostgres: |
-{{ tpl (.Files.Get "init/postgresql.sql") . | indent 4 }}
-{{- with .Values.serverConfig.dbServer.nosql }}
-{{- $dialect := .dialect | lower }}
+{{ tpl (.Files.Get "init/postgresql.sql") . | indent 4 -}}
+{{- $dialect := .Values.serverConfig.dbServer.nosql.dialect | lower }}
 {{- if eq $dialect "mongo" }}
   initMongo: |
 {{ tpl (.Files.Get "init/mongo.js") . | indent 4 }}
@@ -21,7 +20,6 @@ data:
 {{- else if eq $dialect "hbase" }}
   initHbase: |
 {{ tpl (.Files.Get "init/hbase.sql") . | indent 4 }}
-{{- end }}
 {{- end }}
   serverConfig: |
 {{ tpl (.Files.Get "config/server-config.xml") . | indent 4 }}
