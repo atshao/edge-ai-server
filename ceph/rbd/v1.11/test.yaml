@@ -1,0 +1,38 @@
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: alex-nginx
+spec:
+  selector:
+    matchLabels:
+      by: alex
+  template:
+    metadata:
+      name: alex-nginx
+      labels:
+        by: alex
+    spec:
+      containers:
+        - name: alex-nginx
+          image: nginx
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: ceph-rbd
+              mountPath: /ceph
+              readOnly: false
+      volumes:
+        - name: ceph-rbd
+          persistentVolumeClaim:
+            claimName: rbd-claim
+          #rbd:
+          #  monitors:
+          #    - '61.218.118.227:6789'
+          #  pool: rbd
+          #  image: foo
+          #  fsType: xfs
+          #  readOnly: false
+          #  user: admin
+          #  secretRef:
+          #    name: ceph-secret
+
