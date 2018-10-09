@@ -1,3 +1,16 @@
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: rbd-claim
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: rbd
+  resources:
+    requests:
+      storage: 10Gi
+---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
@@ -25,14 +38,4 @@ spec:
         - name: ceph-rbd
           persistentVolumeClaim:
             claimName: rbd-claim
-          #rbd:
-          #  monitors:
-          #    - '61.218.118.227:6789'
-          #  pool: rbd
-          #  image: foo
-          #  fsType: xfs
-          #  readOnly: false
-          #  user: admin
-          #  secretRef:
-          #    name: ceph-secret
 
