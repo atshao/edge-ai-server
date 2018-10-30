@@ -1,2 +1,2 @@
-helm install --name=dev-broker -f values.yaml stable/rabbitmq-ha
+helm install --name=dev-rmq -f values.yaml stable/rabbitmq-ha --version=1.10.0
 

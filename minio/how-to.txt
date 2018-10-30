@@ -1,2 +1,2 @@
-helm install --name=dev-minio -f values.yaml stable/minio
+helm install --name=dev-minio -f values.yaml stable/minio --version=1.6.3
 

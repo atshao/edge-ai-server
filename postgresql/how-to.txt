@@ -1,2 +1,2 @@
-helm install --name=dev-rdb -f values.yaml stable/postgresql
+helm install --name=dev-psql -f values.yaml stable/postgresql --version=0.17.0
 

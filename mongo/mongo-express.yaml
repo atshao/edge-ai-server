@@ -19,7 +19,7 @@ spec:
             - containerPort: 8081
           env:
             - name: ME_CONFIG_MONGODB_SERVER
-              value: "dev-nosql-mongodb-replicaset-0.dev-nosql-mongodb-replicaset.default,dev-nosql-mongodb-replicaset-1.dev-nosql-mongodb-replicaset.default,dev-nosql-mongodb-replicaset-2.dev-nosql-mongodb-replicaset.default"
+              value: "dev-mongo-mongodb-replicaset-0.dev-mongo-mongodb-replicaset.default,dev-mongo-mongodb-replicaset-1.dev-mongo-mongodb-replicaset.default,dev-mongo-mongodb-replicaset-2.dev-mongo-mongodb-replicaset.default"
             - name: ME_CONFIG_OPTIONS_EDITORTHEME
               value: ambiance
             - name: ME_CONFIG_BASICAUTH_USERNAME

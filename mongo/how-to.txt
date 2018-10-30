@@ -1,2 +1,2 @@
-helm install --name=dev-nosql -f values.yaml stable/mongodb-replicaset
+helm install --name=dev-mongo -f values.yaml stable/mongodb-replicaset --version=3.5.6
 

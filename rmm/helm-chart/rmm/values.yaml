@@ -6,15 +6,15 @@ image:
   rmm: "ecgwc/helm-rmm-worker"
   portal: "ecgwc/helm-rmm-portal"
 imageTag:
-  ota: "1.0.29"
-  rmm: "1.0.79"
-  portal: "1.0.79"
+  ota: "1.0.30"
+  rmm: "1.0.81"
+  portal: "1.0.81"
 #
 # PostgreSQL administrator
 #
 postgresql:
   username: postgres
-  password: "OFL82Vf08c"
+  password: "8hrSW7BcPs"
 #
 # Server_Config.xml
 #
@@ -25,26 +25,26 @@ serverConfig:
   brokerServer:
     receive:
       type: "AMQP"
-      host: "dev-broker-rabbitmq-ha"
+      host: "dev-rmq-rabbitmq-ha"
       port: 5672
       account: "admin"
-      password: "y0XOo3zAn73qUo/K8WZIMmM/Zt2RTwMgusr6PReTQ14="
+      password: "TU19FXp28oqx+q8/EoIO/lJrGmiwGAi/bse8ogeIYzY="
       vhost: "/"
       tenant: "+"
       ssl: false
     send:
       type: "MQTT"
-      host: "dev-broker-rabbitmq-ha"
+      host: "dev-rmq-rabbitmq-ha"
       port: 1883
       account: "admin"
-      password: "y0XOo3zAn73qUo/K8WZIMmM/Zt2RTwMgusr6PReTQ14="
+      password: "TU19FXp28oqx+q8/EoIO/lJrGmiwGAi/bse8ogeIYzY="
       vhost: "/"
       tenant: "WISE-PaaS"
       ssl: false
   dbServer:
     sql:
       postgresql:
-        host: "dev-rdb-postgresql"
+        host: "dev-psql-postgresql"
         port: 5432
         database: "wisepaas"
     nosql:
@@ -53,7 +53,7 @@ serverConfig:
         # NOTE:
         #   if mongo uses replicaset, not using array here.
         #   Instead, uses string with ';' as the delimiter.
-        host: "dev-nosql-mongodb-replicaset-0.dev-nosql-mongodb-replicaset;dev-nosql-mongodb-replicaset-1.dev-nosql-mongodb-replicaset;dev-nosql-mongodb-replicaset-2.dev-nosql-mongodb-replicaset"
+        host: "dev-mongo-mongodb-replicaset-0.dev-mongo-mongodb-replicaset;dev-mongo-mongodb-replicaset-1.dev-mongo-mongodb-replicaset;dev-mongo-mongodb-replicaset-2.dev-mongo-mongodb-replicaset"
         port: "27017;27017;27017"
         database: "WISE-PaaS"
         ssl: false
