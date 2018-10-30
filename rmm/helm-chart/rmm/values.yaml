@@ -6,9 +6,9 @@ image:
   rmm: "ecgwc/helm-rmm-worker"
   portal: "ecgwc/helm-rmm-portal"
 imageTag:
-  ota: "1.0.30"
-  rmm: "1.0.81"
-  portal: "1.0.81"
+  ota: "1.0.31"
+  rmm: "1.0.84"
+  portal: "1.0.84"
 #
 # PostgreSQL administrator
 #
